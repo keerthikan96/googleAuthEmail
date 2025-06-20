@@ -11,28 +11,21 @@ export interface User {
 }
 
 export interface EmailMetadata {
-  id: string;
-  userId: string;
-  gmailMessageId: string;
+  id: number;
+  messageId: string;
   threadId: string;
   subject: string;
-  fromEmail: string;
-  fromName?: string;
-  toEmails: string[];
-  ccEmails?: string[];
-  bccEmails?: string[];
-  bodySnippet: string;
-  bodyText?: string;
-  bodyHtml?: string;
-  hasAttachments: boolean;
-  attachmentCount: number;
-  labels: string[];
+  sender: string;
+  senderName?: string;
+  snippet: string;
+  receivedDate: string;
   isRead: boolean;
-  isImportant: boolean;
   isStarred: boolean;
-  receivedAt: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  hasAttachments: boolean;
+  labels: string[];
+  priority: 'low' | 'medium' | 'high';
+  size: number;
+  createdAt: string;
 }
 
 export interface EmailSearchParams {
@@ -69,6 +62,7 @@ export interface AuthContextType {
 }
 
 export interface ApiResponse<T> {
+  email: EmailMetadata | PromiseLike<EmailMetadata>;
   success: boolean;
   data?: T;
   message?: string;

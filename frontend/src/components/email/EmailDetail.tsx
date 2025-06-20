@@ -11,11 +11,11 @@ export function EmailDetail() {
   const markAsReadMutation = useMarkAsRead();
   const markAsImportantMutation = useMarkAsImportant();
   const starEmailMutation = useStarEmail();
-
   React.useEffect(() => {
     // Mark as read when viewing
+    console.log('EmailDetail useEffect', email);
     if (email && !email.isRead) {
-      markAsReadMutation.mutate({ id: email.id, isRead: true });
+      markAsReadMutation.mutate({ id: email.id.toString(), isRead: true });
     }
   }, [email, markAsReadMutation]);
 
@@ -39,40 +39,24 @@ export function EmailDetail() {
       </div>
     );
   }
-
   const handleStarClick = () => {
-    starEmailMutation.mutate({ id: email.id, isStarred: !email.isStarred });
+    starEmailMutation.mutate({ id: email.id.toString(), isStarred: !email.isStarred });
   };
 
   const handleImportantClick = () => {
-    markAsImportantMutation.mutate({ id: email.id, isImportant: !email.isImportant });
+    markAsImportantMutation.mutate({ id: email.id.toString(), isImportant: email.priority !== 'high' });
   };
 
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleString();
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString();
   };
-
   const renderEmailBody = () => {
-    if (email.bodyHtml) {
-      return (
-        <div
-          className="prose max-w-none"
-          dangerouslySetInnerHTML={{ __html: email.bodyHtml }}
-        />
-      );
-    } else if (email.bodyText) {
-      return (
-        <div className="whitespace-pre-wrap text-gray-800">
-          {email.bodyText}
-        </div>
-      );
-    } else {
-      return (
-        <div className="text-gray-600 italic">
-          {email.bodySnippet}
-        </div>
-      );
-    }
+    // Since our EmailMetadata only has snippet, we'll use that
+    return (
+      <div className="text-gray-800 whitespace-pre-wrap">
+        {email.snippet}
+      </div>
+    );
   };
 
   return (
@@ -97,16 +81,15 @@ export function EmailDetail() {
             </svg>
             {email.isStarred ? 'Starred' : 'Star'}
           </Button>
-          
-          <Button
+            <Button
             variant="ghost"
             onClick={handleImportantClick}
-            className={email.isImportant ? 'text-red-500' : 'text-gray-400'}
+            className={email.priority === 'high' ? 'text-red-500' : 'text-gray-400'}
           >
-            <svg className="w-5 h-5" fill={email.isImportant ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill={email.priority === 'high' ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
-            {email.isImportant ? 'Important' : 'Mark Important'}
+            {email.priority === 'high' ? 'Important' : 'Mark Important'}
           </Button>
         </div>
       </div>
@@ -118,47 +101,20 @@ export function EmailDetail() {
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
             {email.subject || '(No subject)'}
           </h1>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 text-sm">
             <div>
               <div className="flex items-center mb-2">
                 <span className="font-medium text-gray-700 w-16">From:</span>
                 <span className="text-gray-900">
-                  {email.fromName ? `${email.fromName} <${email.fromEmail}>` : email.fromEmail}
+                  {email.senderName ? `${email.senderName} <${email.sender}>` : email.sender}
                 </span>
               </div>
-              
-              <div className="flex items-start mb-2">
-                <span className="font-medium text-gray-700 w-16 flex-shrink-0">To:</span>
-                <div className="flex-1">
-                  {email.toEmails.map((to, index) => (
-                    <span key={index} className="text-gray-900">
-                      {to}
-                      {index < email.toEmails.length - 1 && ', '}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              
-              {email.ccEmails && email.ccEmails.length > 0 && (
-                <div className="flex items-start mb-2">
-                  <span className="font-medium text-gray-700 w-16 flex-shrink-0">CC:</span>
-                  <div className="flex-1">
-                    {email.ccEmails.map((cc, index) => (
-                      <span key={index} className="text-gray-900">
-                        {cc}
-                        {index < (email.ccEmails?.length || 0) - 1 && ', '}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
             
             <div>
               <div className="flex items-center mb-2">
                 <span className="font-medium text-gray-700 w-20">Date:</span>
-                <span className="text-gray-900">{formatDate(email.receivedAt)}</span>
+                <span className="text-gray-900">{formatDate(email.receivedDate)}</span>
               </div>
               
               {email.hasAttachments && (
@@ -168,7 +124,7 @@ export function EmailDetail() {
                     <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                     </svg>
-                    {email.attachmentCount} file{email.attachmentCount !== 1 ? 's' : ''}
+                    Files attached
                   </span>
                 </div>
               )}
@@ -188,15 +144,14 @@ export function EmailDetail() {
               </div>
             </div>
           )}
-          
-          {/* Status badges */}
+            {/* Status badges */}
           <div className="flex items-center space-x-2 mt-4">
             {!email.isRead && (
               <Badge variant="info" size="sm">
                 Unread
               </Badge>
             )}
-            {email.isImportant && (
+            {email.priority === 'high' && (
               <Badge variant="warning" size="sm">
                 Important
               </Badge>

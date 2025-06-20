@@ -90,11 +90,10 @@ export const emailService = {
     const response: AxiosResponse<ApiResponse<EmailsResponse>> = await api.get(`/emails?${queryParams}`);
     return response.data.data!;
   },
-
   // Get single email by ID
   getEmailById: async (id: string): Promise<EmailMetadata> => {
-    const response: AxiosResponse<ApiResponse<EmailMetadata>> = await api.get(`/emails/${id}`);
-    return response.data.data!;
+    const response: AxiosResponse<ApiResponse<{ email: EmailMetadata }>> = await api.get(`/emails/${id}`);
+    return response.data.data!.email;
   },
 
   // Mark email as read/unread
