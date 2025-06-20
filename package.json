@@ -1,0 +1,27 @@
+{
+  "name": "gmail-email-viewer",
+  "version": "1.0.0",
+  "description": "A comprehensive Gmail email viewer application with Node.js backend and React frontend",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm start",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "build": "cd backend && npm run build && cd ../frontend && npm run build",
+    "start": "cd backend && npm start"
+  },
+  "keywords": [
+    "gmail",
+    "email",
+    "react",
+    "nodejs",
+    "express",
+    "oauth2",
+    "typescript"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  }
+}
